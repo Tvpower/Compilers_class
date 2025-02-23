@@ -54,7 +54,7 @@ private:
     //private helpers
     char current() const;
     char peek() const;
-    void advance();
+    void advance(){ if (pos < buffer.size()) pos++; };
     void skipWhitespace();
     Token processIdentifier();
     Token processNumber();
