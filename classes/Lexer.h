@@ -28,15 +28,15 @@ enum class State {
 };
 
 enum class TokenType {
-    IDENT,
-    INT,
-    REAL,
-    OPER,
-    SEPA,
-    KEYW,
-    COMM,
-    UNKW,
-    END
+    IDENT,  //Jae
+    INT,   //Adam
+    REAL,   //Adam
+    OPER,  //Mario
+    SEPA,  //Jae
+    KEYW,  //Mario
+    COMM, // ?
+    UNKW, //This is whatever
+    END //This is the end of the file so dont worry
 };
 
 struct Token {
