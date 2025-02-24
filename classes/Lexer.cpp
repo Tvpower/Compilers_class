@@ -35,7 +35,7 @@ Token Lexer::processNumber(){
                     goto ACCEPT;
                 }
                 break;
-            
+
             case State::s2:
                 if(isdigit(buffer[pos])){
                     advance();
@@ -53,19 +53,41 @@ Token Lexer::processNumber(){
                     goto ACCEPT;
                 }
                 break;
-            
+
             case State::s4:
                 goto ERROR;
         }
     }
 
     ACCEPT:
-        if (state == State::s3){
-            return {buffer.substr(start_pos, pos - start_pos), TokenType::REAL};
-        } else {
-            return {buffer.substr(start_pos, pos - start_pos), TokenType::INT};
-        }
+    {
+        return {buffer.substr(start_pos, pos - start_pos), TokenType::INT};
+    }
 
-    ERROR: 
+    ERROR:
         return {buffer.substr(start_pos, pos - start_pos), TokenType::UNKW};
+}
+
+Lexer::StateTransition Lexer::handleStartState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleIdentifierState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleIntegerState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleRealState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleOperatorState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleCommentState() {
+    return Lexer::StateTransition();
 }
