@@ -46,8 +46,10 @@ Token Lexer::processNumber(){
                     goto ACCEPT;
                 }
                 break;
+
             
             case State::s2: //Becomes a REAL, either next char is an int or becomes error
+
                 if(isdigit(buffer[pos])){
                     state = State::s3;
                     advance();
@@ -67,6 +69,7 @@ Token Lexer::processNumber(){
                 break;
             
             case State::s4: //Automatically becomes error
+
                 goto ERROR;
         }
     }
@@ -80,4 +83,28 @@ Token Lexer::processNumber(){
 
     ERROR: //If state ended on state 4
         return {buffer.substr(start_pos, pos - start_pos), TokenType::UNKW};
+}
+
+Lexer::StateTransition Lexer::handleStartState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleIdentifierState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleIntegerState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleRealState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleOperatorState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleCommentState() {
+    return Lexer::StateTransition();
 }
