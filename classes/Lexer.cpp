@@ -8,6 +8,49 @@
 #include <cctype>
 
 
+Token Lexer::getNextToken() {
+    currentState = State::START;
+
+    while (currentState != State::END && currentState != State::ERROR) {
+        StateTransition transition;
+
+        switch (currentState) {
+            case State::START:
+                transition = handleStartState();
+                break;
+            case State::IN_IDENTIFIER:
+                transition = handleIdentifierState();
+                break;
+            case State::IN_INTEGER:
+                transition = handleIntegerState();
+                break;
+            case State::IN_REAL:
+                transition = handleRealState();
+                break;
+            case State::IN_OPERATOR:
+                transition = handleOperatorState();
+                break;
+            case State::IN_COMMENT:
+                transition = handleCommentState();
+                break;
+            default:
+                return {getCurrentLexeme(), TokenType::UNKW};
+        }
+        currentState = transition.first;
+
+        //If theres an action to perform during transition, do it
+        if (transition.second) {
+            transition.second();
+        }
+    }
+    if (currentState == State::ERROR) {
+        return {getCurrentLexeme(), TokenType::UNKW};
+    }
+
+    return lastToken;
+}
+
+
 Lexer::StateTransition Lexer::handleStartState() {
     while (std::isspace(current())) {
         advance();
@@ -20,7 +63,7 @@ Lexer::StateTransition Lexer::handleStartState() {
         }};
     }
     //check for identifier start
-    if (std::isalpha(current() || current() == '_')) {
+    if (std::isalpha(current()) || current() == '_') {
         advance();
         return {State::IN_IDENTIFIER, nullptr};
     }
@@ -47,8 +90,6 @@ Lexer::StateTransition Lexer::handleStartState() {
     advance();
     return {State::ERROR, nullptr};
 }
-
-
 
 Lexer::StateTransition Lexer::handleIdentifierState() {
     return Lexer::StateTransition();
