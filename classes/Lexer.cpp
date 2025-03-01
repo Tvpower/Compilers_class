@@ -118,9 +118,19 @@ Lexer::StateTransition Lexer::handleRealState() {
 }
 
 Lexer::StateTransition Lexer::handleOperatorState() {
-    return Lexer::StateTransition();
+    if (isOperator(current())){
+        if (peek() == '=' || peek() == '/'){ //For operators such as ==, <=, //
+            advance(); //extra advance
+        } //Might need && and || but not mentioned in documentation
+        advance();
+        return {State::END, [this](){
+            lastToken = {getCurrentLexeme(), TokenType::OPER};
+        }};
+    }
 }
 
-Lexer::StateTransition Lexer::handleCommentState() {
-    return Lexer::StateTransition();
+Lexer::StateTransition Lexer::handleCommentState() { //Shouldnt return syntax
+    while (!(current() == '*' && peek() == ']')){
+        advance();
+    }
 }
