@@ -1,4 +1,4 @@
-# Lexical Analyzer
+# Compiler for RAT25S
 
 ## CPSC 323
 
