@@ -7,77 +7,120 @@
 #include <string>
 #include <cctype>
 
-Token Lexer::processNumber(){
-    size_t start_pos = pos;
-    enum class State {
-        s0, s1, s2, s3, s4 
-        /*
-        s0 = starting state
-        s1 = integer state
-        s2 = transitioning to real
-        s3 = accepting real
-        s4 = ERROR state
-        */
-    };
-    State state = State::s0;
 
-//Checking that first char is a valid integer
-    if (isdigit(buffer[pos])){
-        state = State::s1;
+Token Lexer::getNextToken() {
+    currentState = State::START;
+
+    while (currentState != State::END && currentState != State::ERROR) {
+        StateTransition transition;
+
+        switch (currentState) {
+            case State::START:
+                transition = handleStartState();
+                break;
+            case State::IN_IDENTIFIER:
+                transition = handleIdentifierState();
+                break;
+            case State::IN_INTEGER:
+                transition = handleIntegerState();
+                break;
+            case State::IN_REAL:
+                transition = handleRealState();
+                break;
+            case State::IN_OPERATOR:
+                transition = handleOperatorState();
+                break;
+            case State::IN_COMMENT:
+                transition = handleCommentState();
+                break;
+            default:
+                return {getCurrentLexeme(), TokenType::UNKW};
+        }
+        currentState = transition.first;
+
+        //If theres an action to perform during transition, do it
+        if (transition.second) {
+            transition.second();
+        }
+    }
+    if (currentState == State::ERROR) {
+        return {getCurrentLexeme(), TokenType::UNKW};
+    }
+
+    return lastToken;
+}
+
+
+Lexer::StateTransition Lexer::handleStartState() {
+    while (std::isspace(current())) {
         advance();
-    } else {
-        return {buffer.substr(start_pos, pos - start_pos), TokenType::UNKW};
+    }
+    start = pos;
+    //check for end of file
+    if (current() == '\0') {
+        return {State::END, [this]() {
+            lastToken = {sv{}, TokenType::END};
+        }};
+    }
+    //check for identifier start
+    if (std::isalpha(current()) || current() == '_') {
+        advance();
+        return {State::IN_IDENTIFIER, nullptr};
+    }
+    //Check for comment start
+    if (current() == '[' && peek() == '*') {
+        advance();
+        advance();
+        return {State::IN_COMMENT, nullptr};
+    }
+    //Check for operator
+    if (isOperator(current())) {
+        advance();
+        return {State::IN_OPERATOR, nullptr};
+    }
+    //Check for separator
+    if (isSeparator(current())) {
+        advance();
+        return {State::END, [this]() {
+            lastToken = {getCurrentLexeme(), TokenType::SEPA};
+        }};
     }
 
+    //If none of the last option then it's unknown character
+    advance();
+    return {State::ERROR, nullptr};
+}
 
-//FSM, starts at state 1 and transitions to other states or ACCEPTING/ERROR
+Lexer::StateTransition Lexer::handleIdentifierState() {
+    return Lexer::StateTransition();
+}
 
-    while (pos < buffer.size()){
-        switch (state){
-            case State::s1: //Char is a valid integer
-                if (isdigit(buffer[pos])){
-                    advance();
-                } else if (buffer[pos] == '.' && (pos+1 < buffer.size()) && isdigit(buffer[pos + 1])) { //has a decimal
-                    state = State::s2; 
-                } else if (!isspace(buffer[pos]) && !characterTables.isSeparatorChar(buffer[pos])){ //Not an int or separator -> error
-                    state = State::s4;
-                    goto ERROR;
-                } else { //Successfully deemed an int
-                    goto ACCEPT;
-                }
-                break;
-            
-            case State::s2: //Becomes a REAL, either next char is an int or becomes error
-                if(isdigit(buffer[pos])){
-                    state = State::s3;
-                    advance();
-                } else {
-                    goto ERROR;
-                }
-                break;
-
-            case State::s3: //Evaluating valid Real
-                if (isdigit(buffer[pos])){
-                    advance();
-                } else if (!isspace(buffer[pos]) && !characterTables.isSeparatorChar(buffer[pos])){ //Not an int or separator, becomes error
-                    goto ERROR;
-                } else { //Evaluated to be acceptable real
-                    goto ACCEPT;
-                }
-                break;
-            
-            case State::s4: //Automatically becomes error
-                goto ERROR;
-        }
+Lexer::StateTransition Lexer::handleIntegerState() {
+    while (std::isdigit(current())) {
+        advance();
     }
+    if (current() == '.' && std::isdigit(peek())) {
+        advance(); //if dot consume it
+        return {State::IN_REAL, nullptr};
+    }
+    return {State::END, [this]() {
+        lastToken = {getCurrentLexeme(), TokenType::INT};
+    }};
+}
 
-    ACCEPT: //If state ended on state 1 or 3, accepting state
-        if (state == State::s3){
-            return {buffer.substr(start_pos, pos - start_pos), TokenType::REAL};
-        } else {
-            return {buffer.substr(start_pos, pos - start_pos), TokenType::INT};
-        }
+Lexer::StateTransition Lexer::handleRealState() {
+    while (std::isdigit(current())){
+        advance();
+    }
+    return {State::END, [this]() {
+        lastToken = {getCurrentLexeme(), TokenType::REAL}; //Need to ensure this returns full number before and after '.' and not just the digits after
+    }};
+}
 
-    ERROR: //If state ended on state 4
-        return {buffer.substr(start_pos, pos - start_pos), TokenType::UNKW};
+Lexer::StateTransition Lexer::handleOperatorState() {
+    return Lexer::StateTransition();
+}
+
+Lexer::StateTransition Lexer::handleCommentState() {
+    return Lexer::StateTransition();
 }
