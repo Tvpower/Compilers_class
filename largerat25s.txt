@@ -1,0 +1,33 @@
+[*This is a calculator for random equations*]
+$$
+function factorial (x integer){
+    integer result;
+    result = 1;
+    while (x > 1){
+        result = result * x;
+        x = x - 1;
+    }
+    return result;
+}
+
+function fibonacci (x integer){
+    integer a, b, c;
+    a = 0;
+    b = 1;
+    print (a);
+    print(b);
+    while(b <= x){
+        c = a + b;
+        a = b;
+        b = c;
+        print (c);
+    }
+    return 0;
+}
+
+integer x;
+x = 10;
+print(x);
+print(factorial(x));
+fibonacci(x);
+$$
