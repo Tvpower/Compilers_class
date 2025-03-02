@@ -119,30 +119,33 @@ Lexer::StateTransition Lexer::handleRealState() {
 
 Lexer::StateTransition Lexer::handleOperatorState() {
     if (isOperator(current())){
-        if (peek() == '=' || peek() == '/'){ //For operators such as ==, <=, //
-            advance(); //extra advance
+        if (peek() == '=' || peek() == '/'){ // For operators such as ==, <=, //
+            advance(); // extra advance
         }
-        advance();
-        return {State::END, [this](){
-            lastToken = {getCurrentLexeme(), TokenType::OPER};
-        }};
-    }
-}
-
-Lexer::StateTransition Lexer::handleCommentState() { //Shouldnt return syntax
-    while (!(current() == '*' && peek() == ']')){
-        advance();
     }
 
-    return {State::END, [this]() {
-       lastToken = {getCurrentLexeme(), TokenType::OPER};
+    advance();
+    return {State::END, [this](){
+        lastToken = {getCurrentLexeme(), TokenType::OPER};
     }};
 }
 
 Lexer::StateTransition Lexer::handleCommentState() {
-    return Lexer::StateTransition();
-}
+    while (!(current() == '*' && peek() == ']')) {
+        if (current() == '\0') { // Check for EOF in comment
+            return {State::ERROR, nullptr};
+        }
+        advance();
+    }
 
+    // Consume the closing '*]'
+    advance(); // for '*'
+    advance(); // for ']'
+
+    return {State::END, [this]() {
+        lastToken = {getCurrentLexeme(), TokenType::COMM};
+    }};
+}
 const std::unordered_map<sv, bool> Lexer::keywords = {
     {"function", true},
     {"integer", true},
@@ -159,5 +162,4 @@ const std::unordered_map<sv, bool> Lexer::keywords = {
     {"true", true},
     {"false", true}
 };
-}
 
