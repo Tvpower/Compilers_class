@@ -1,0 +1,8 @@
+[*Simple arithmetic*]
+$$
+real a, b, c;
+scan(a, b, c);
+$$
+a = a * b / c;
+print (a);
+$$

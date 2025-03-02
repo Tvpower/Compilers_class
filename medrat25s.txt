@@ -1,0 +1,14 @@
+[*Converting farenheit to celsius*]
+$$
+function F_to_C (f integer){
+	f = f - 32;
+	f = 5 * f;
+	f = f / 9;
+	return f;
+}
+$$
+integer f;
+f = 68;
+print(f);
+print(F_to_C(f));
+$$
