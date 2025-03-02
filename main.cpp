@@ -54,9 +54,6 @@ int main(int argc, char* argv[]) {
         outFile << std::left << std::setw(20) << "token" << "lexeme\n";
         outFile << std::string(40, '-') << "\n";
 
-        //Start timing
-        auto start = std::chrono::high_resolution_clock::now();
-
         //Process tokens in a simple loop
         Token token;
         while ((token = lexer.getNextToken()).type != TokenType::END) {
@@ -65,12 +62,6 @@ int main(int argc, char* argv[]) {
 
             outFile << std::left << std::setw(20) << tokenStr << lexemeStr << "\n";
         }
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> elapsed = end - start;
-
-        std::string stats = "\nLexical analysis completed in " + std::to_string(elapsed.count()) + "ms\n";
-
-        outFile << stats;
         return 0;
     }
     catch (const std::exception& e) {
