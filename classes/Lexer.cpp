@@ -73,6 +73,11 @@ Lexer::StateTransition Lexer::handleStartState() {
         advance();
         return {State::IN_COMMENT, nullptr};
     }
+    //Numbers
+    if (isdigit(current())){
+        advance();
+        return {State::IN_INTEGER, nullptr};
+    }
     //Check for operator
     if (isOperator(current())) {
         advance();
