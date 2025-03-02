@@ -99,13 +99,14 @@ Lexer::StateTransition Lexer::handleIdentifierState() {
         return {State::END, [this]() {
             lastToken = {getCurrentLexeme(), TokenType::KEYW};
         }};
-    } 
+    }
     else {
         return {State::END, [this]() {
-        lastToken = {getCurrentLexeme(), TokenType::IDENT};
+            lastToken = {getCurrentLexeme(), TokenType::IDENT};
         }};
     }
 }
+
 
 Lexer::StateTransition Lexer::handleIntegerState() {
     while (std::isdigit(current())) {
