@@ -92,7 +92,19 @@ Lexer::StateTransition Lexer::handleStartState() {
 }
 
 Lexer::StateTransition Lexer::handleIdentifierState() {
-    return Lexer::StateTransition();
+    while(isalpha(current()) || isdigit(current()) || current() == '_'){
+        advance();
+    }
+    if (Lexer::keywords.find(getCurrentLexeme()) != Lexer::keywords.end()){
+        return {State::END, [this]() {
+            lastToken = {getCurrentLexeme(), TokenType::KEYW};
+        }};
+    } 
+    else {
+        return {State::END, [this]() {
+        lastToken = {getCurrentLexeme(), TokenType::IDENT};
+        }};
+    }
 }
 
 Lexer::StateTransition Lexer::handleIntegerState() {
