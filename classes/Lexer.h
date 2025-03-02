@@ -94,7 +94,7 @@ public:
     explicit Lexer(const std::string& filename) {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         if (!file) {
-            throw std::runtime_error("Could not open input file");
+            throw std::runtime_error("Could not open input.txt file");
         }
 
         auto size = file.tellg();
@@ -104,17 +104,6 @@ public:
         file.read(buffer.data(), size);
     }
     Token getNextToken();
-};
-
-const std::unordered_map<sv, bool> Lexer::keywords = {
-        {"while", true},
-        {"endwhile", true},
-        {"if", true},
-        {"endif", true},
-        {"else", true},
-        {"return", true},
-        {"get", true},
-        {"put", true}
 };
 
 

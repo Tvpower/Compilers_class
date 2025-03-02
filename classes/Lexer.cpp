@@ -133,4 +133,31 @@ Lexer::StateTransition Lexer::handleCommentState() { //Shouldnt return syntax
     while (!(current() == '*' && peek() == ']')){
         advance();
     }
+
+    return {State::END, [this]() {
+       lastToken = {getCurrentLexeme(), TokenType::OPER};
+    }};
 }
+
+Lexer::StateTransition Lexer::handleCommentState() {
+    return Lexer::StateTransition();
+}
+
+const std::unordered_map<sv, bool> Lexer::keywords = {
+    {"function", true},
+    {"integer", true},
+    {"boolean", true},
+    {"real", true},
+    {"if", true},
+    {"else", true},
+    {"endif", true},
+    {"while", true},
+    {"endwhile", true},
+    {"return", true},
+    {"scan", true},
+    {"print", true},
+    {"true", true},
+    {"false", true}
+};
+}
+
