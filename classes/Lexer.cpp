@@ -67,6 +67,11 @@ Lexer::StateTransition Lexer::handleStartState() {
         advance();
         return {State::IN_IDENTIFIER, nullptr};
     }
+    // Check for integer start
+    if (std::isdigit(current())) {
+        advance();
+        return {State::IN_INTEGER, nullptr};
+    }
     //Check for comment start
     if (current() == '[' && peek() == '*') {
         advance();
@@ -113,7 +118,20 @@ Lexer::StateTransition Lexer::handleRealState() {
 }
 
 Lexer::StateTransition Lexer::handleOperatorState() {
-    return Lexer::StateTransition();
+    //Handle common operators
+    if ((current() == '=' && buffer[start] == '=') || ((buffer[start] == '<' || buffer[start] == '>') && current() == '='))
+    {
+        advance();
+    }
+
+    //handle division operator that might be confused with comment start
+    if (buffer[start] == '/' && current() == '*') {
+        advance();
+    }
+
+    return {State::END, [this]() {
+       lastToken = {getCurrentLexeme(), TokenType::OPER};
+    }};
 }
 
 Lexer::StateTransition Lexer::handleCommentState() {
