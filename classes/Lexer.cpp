@@ -67,11 +67,6 @@ Lexer::StateTransition Lexer::handleStartState() {
         advance();
         return {State::IN_IDENTIFIER, nullptr};
     }
-    // Check for integer start
-    if (std::isdigit(current())) {
-        advance();
-        return {State::IN_INTEGER, nullptr};
-    }
     //Check for comment start
     if (current() == '[' && peek() == '*') {
         advance();
@@ -114,26 +109,28 @@ Lexer::StateTransition Lexer::handleIntegerState() {
 }
 
 Lexer::StateTransition Lexer::handleRealState() {
-    return Lexer::StateTransition();
-}
-
-Lexer::StateTransition Lexer::handleOperatorState() {
-    //Handle common operators
-    if ((current() == '=' && buffer[start] == '=') || ((buffer[start] == '<' || buffer[start] == '>') && current() == '='))
-    {
+    while (std::isdigit(current())){
         advance();
     }
-
-    //handle division operator that might be confused with comment start
-    if (buffer[start] == '/' && current() == '*') {
-        advance();
-    }
-
     return {State::END, [this]() {
-       lastToken = {getCurrentLexeme(), TokenType::OPER};
+        lastToken = {getCurrentLexeme(), TokenType::REAL}; //Need to ensure this returns full number before and after '.' and not just the digits after
     }};
 }
 
-Lexer::StateTransition Lexer::handleCommentState() {
-    return Lexer::StateTransition();
+Lexer::StateTransition Lexer::handleOperatorState() {
+    if (isOperator(current())){
+        if (peek() == '=' || peek() == '/'){ //For operators such as ==, <=, //
+            advance(); //extra advance
+        }
+        advance();
+        return {State::END, [this](){
+            lastToken = {getCurrentLexeme(), TokenType::OPER};
+        }};
+    }
+}
+
+Lexer::StateTransition Lexer::handleCommentState() { //Shouldnt return syntax
+    while (!(current() == '*' && peek() == ']')){
+        advance();
+    }
 }
