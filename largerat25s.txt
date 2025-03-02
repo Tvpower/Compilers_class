@@ -7,6 +7,7 @@ function factorial (x integer){
         result = result * x;
         x = x - 1;
     }
+    endwhile;
     return result;
 }
 
@@ -22,6 +23,7 @@ function fibonacci (x integer){
         b = c;
         print (c);
     }
+    endwhile;
     return 0;
 }
 
