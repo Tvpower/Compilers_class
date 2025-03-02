@@ -121,7 +121,7 @@ Lexer::StateTransition Lexer::handleOperatorState() {
     if (isOperator(current())){
         if (peek() == '=' || peek() == '/'){ //For operators such as ==, <=, //
             advance(); //extra advance
-        } //Might need && and || but not mentioned in documentation
+        }
         advance();
         return {State::END, [this](){
             lastToken = {getCurrentLexeme(), TokenType::OPER};
