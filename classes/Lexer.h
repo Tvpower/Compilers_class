@@ -78,7 +78,7 @@ private:
     }
     bool isSeparator(char c ) const {
         return c == '(' || c == ')' || c == '{' || c == '}' ||
-               c == '[' || c == ']' || c == ';' || c == ',';
+               c == '[' || c == ']' || c == ';' || c == ',' || c == '$';
     }
     using StateTransition = std::pair<State, std::function<void()>>;
     StateTransition handleStartState();

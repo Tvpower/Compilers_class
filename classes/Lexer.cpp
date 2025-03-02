@@ -85,6 +85,9 @@ Lexer::StateTransition Lexer::handleStartState() {
     }
     //Check for separator
     if (isSeparator(current())) {
+        if (current() == '$' && peek() == '$'){
+            advance();
+        }
         advance();
         return {State::END, [this]() {
             lastToken = {getCurrentLexeme(), TokenType::SEPA};
