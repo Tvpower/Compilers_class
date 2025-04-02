@@ -1,15 +1,4 @@
-#include "classes/Lexer.h"
-#include <vector>
-#include <iostream>
-#include <string>
-#include <stack>
-#include <variant>
-
-//struct ParseNode {
-//    std::string value;
-//    std::vector<std::shared_ptr<ParseNode>> children;
-//}
-
+#include "parser.h"
 
 class Parser{
 private:
@@ -24,11 +13,11 @@ private:
     }
     
     bool match(TokenType expectedType){
-        if (currentToken.type == expectedType){
-            advanceToken();
-            return true;
-        }
-        return false;
+        return currentToken.type == expectedType;
+    }
+
+    bool Parser::matchLexeme(const std::string& expectedLexeme){
+        return currentToken.lexeme == expectedLexeme;
     }
 
     void error(const std::string& message){
@@ -421,6 +410,7 @@ public:
 
     void fillParserStack(std::vector<std::string> tokens) {
         for (int i = tokens.size() - 1; i >= 0; --i) {
+            //if (tokens.type == TokenType::COMM) Have to not push comments
             parserStack.push(tokens[i]);
         }
     } //DO THIS FIRST, Store the tokens in reverse order to pop off the stack in order
@@ -429,4 +419,8 @@ public:
     void parse(){
         parseRat25s();
     } // Error finder
+
+    void outputParseTree(std::ofstream& outFile){
+
+    }
 };
