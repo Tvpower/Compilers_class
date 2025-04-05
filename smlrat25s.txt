@@ -1,4 +1,3 @@
-[*Simple arithmetic*]
 $$
 real a, b, c;
 scan(a, b, c);
