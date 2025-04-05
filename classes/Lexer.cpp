@@ -78,8 +78,13 @@ Lexer::StateTransition Lexer::handleStartState() {
         advance();
         return {State::IN_INTEGER, nullptr};
     }
-    //Check for operator
+    //Check for operator - Make sure equals sign is explicitly handled
     if (isOperator(current())) {
+        // Explicitly validate equals sign
+        if (current() == '=') {
+            advance();
+            return {State::IN_OPERATOR, nullptr};
+        }
         advance();
         return {State::IN_OPERATOR, nullptr};
     }
@@ -139,15 +144,32 @@ Lexer::StateTransition Lexer::handleRealState() {
 }
 
 Lexer::StateTransition Lexer::handleOperatorState() {
-    if (isOperator(current())){
-        if (peek() == '=' || peek() == '/'){ // For operators such as ==, <=, //
-            advance(); // extra advance
-        }
+    // First check for compound operators
+    if (current() == '=' && peek() == '=') {
+        advance(); // consume first '='
+        advance(); // consume second '='
+    }
+    else if ((current() == '<' || current() == '>' || current() == '!') && peek() == '=') {
+        advance(); // consume first char
+        advance(); // consume '='
+    }
+    else if (current() == '/' && peek() == '/') {
+        advance(); // consume first '/'
+        advance(); // consume second '/'
+    }
+    else {
+        // For single-character operators
+        advance();
     }
 
-    advance();
-    return {State::END, [this](){
-        lastToken = {getCurrentLexeme(), TokenType::OPER};
+    // Trim trailing whitespace from the lexeme
+    size_t endPos = pos;
+    while (endPos > start && std::isspace(buffer[endPos - 1])) {
+        endPos--;
+    }
+
+    return {State::END, [this, endPos](){
+        lastToken = {sv{buffer.data() + start, endPos - start}, TokenType::OPER};
     }};
 }
 

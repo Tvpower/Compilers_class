@@ -17,10 +17,12 @@ private:
     std::stack<std::variant<std::string, TokenType>> parserStack;
 
     void advanceToken();
-    bool match(TokenType expectedType);
-    bool matchLexeme(const std::string& expectedLexeme);
-    void error(const std::string& message);
+    bool match(TokenType expectedType) const;
+    bool matchLexeme(const std::string& expectedLexeme) const;
+    void error(const std::string& message) const;
     void initializeParserStack();
+
+    void skipComments();
 
     // Parser methods for each grammar rule
     void parseRat25s();
@@ -60,15 +62,16 @@ public:
     explicit Parser(Lexer& lexer);
 
     // Configure the parser
-    void setOutputFile(std::ofstream& outFile);
-    void setRulePrinting(bool enabled);
+    static void setOutputFile(std::ofstream& outFile);
+    static void setRulePrinting(bool enabled);
     void fillParserStack(std::vector<std::string> tokens);
 
     // Run the parser
     void parse();
 
     // Output parse tree information
-    void outputParseTree(std::ofstream& outFile);
+    void outputParseTree(std::ofstream& outFile) const;
+
 };
 
 #endif // PARSER_H

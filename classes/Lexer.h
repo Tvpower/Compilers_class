@@ -68,7 +68,12 @@ private:
     void advance(){ pos++; };
 
     sv getCurrentLexeme() const {
-        return sv{buffer.data() + start, pos - start};
+        size_t length = pos - start;
+        // Trim trailing whitespace
+        while (length > 0 && std::isspace(buffer[start + length - 1])) {
+            length--;
+        }
+        return sv{buffer.data() + start, length};
     }
 
 

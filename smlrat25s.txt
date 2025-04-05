@@ -1,3 +1,4 @@
+[* this is comment for this sample code which converts Fahrenheit into Celcius *]
 $$
 real a, b, c;
 scan(a, b, c);

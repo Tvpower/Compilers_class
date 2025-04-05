@@ -15,6 +15,7 @@ void printProductionRule(const std::string& rule) {
     }
 }
 
+
 // Helper function to print token and lexeme information
 void printTokenInfo(const Token& token) {
     if (ruleOutputFile != nullptr) {
@@ -40,18 +41,21 @@ void Parser::advanceToken(){
         // Print token information before advancing
         printTokenInfo(currentToken);
         currentToken = lexer.getNextToken();
+
+        // Skip any comment tokens automatically
+        skipComments();
     }
 }
 
-bool Parser::match(TokenType expectedType){
+bool Parser::match(TokenType expectedType) const{
     return currentToken.type == expectedType;
 }
 
-bool Parser::matchLexeme(const std::string& expectedLexeme){
+bool Parser::matchLexeme(const std::string& expectedLexeme) const{
     return currentToken.lexeme == expectedLexeme;
 }
 
-void Parser::error(const std::string& message){
+void Parser::error(const std::string& message) const {
     if (ruleOutputFile != nullptr) {
         *ruleOutputFile << "Syntax error: " << message << " at token " << std::string(currentToken.lexeme) << std::endl;
     }
@@ -64,17 +68,29 @@ void Parser::initializeParserStack(){
     std::vector<std::string> separators = {"(", ")", "{", "}", ";", ","};
 
     for (const auto& kw : keywords){
-        parserStack.push(kw);
+        parserStack.emplace(kw);
     }
     for (const auto& sep : separators){
-        parserStack.push(sep);
+        parserStack.emplace(sep);
     }
 }
 
 // R1. <Rat25S> ::= $$ <Program> $$
-// Modified to be more flexible with input format
+// Add this function implementation to parser.cpp
+
+// Helper method to skip comments
+void Parser::skipComments() {
+    while (match(TokenType::COMM)) {
+        printTokenInfo(currentToken);
+        advanceToken();
+    }
+}
+
 void Parser::parseRat25s(){
     printProductionRule("<Rat25S> ::= $$ <Program> $$");
+
+    // Skip any comments that appear before the opening $$
+    skipComments();
 
     if (match(TokenType::SEPA) && currentToken.lexeme == "$$"){
         advanceToken();
@@ -89,7 +105,7 @@ void Parser::parseRat25s(){
     }
 }
 
-// New method to handle a more flexible program structure
+
 void Parser::parseProgram() {
     printProductionRule("<Program> ::= <Functions and Declarations and Statements>");
 
@@ -97,6 +113,10 @@ void Parser::parseProgram() {
     while (!match(TokenType::SEPA) || currentToken.lexeme != "$$") {
         if (match(TokenType::END)) {
             error("Unexpected end of file before closing $$");
+        }
+        else if (match(TokenType::COMM)) {
+            // Simply skip comments by advancing to the next token
+            advanceToken();
         }
         else if (match(TokenType::KEYW)) {
             if (currentToken.lexeme == "function") {
@@ -134,7 +154,6 @@ void Parser::parseOptFunctionDefinitions(){
     }
     // Empty production - do nothing
 }
-
 // R3. <Function Definitions> ::= <Function> | <Function> <Function Definitions>
 void Parser::parseFunctionDefinitions(){
     printProductionRule("<Function Definitions> ::= <Function> | <Function> <Function Definitions>");
@@ -144,6 +163,7 @@ void Parser::parseFunctionDefinitions(){
         parseFunction();
     }
 }
+
 
 // R4. <Function> ::= function <Identifier> ( <Opt Parameter List> ) <Opt Declaration List> <Body>
 void Parser::parseFunction() {
@@ -361,6 +381,14 @@ void Parser::parseAssign(){
 
     if (match(TokenType::IDENT)){
         advanceToken();
+
+        // Debug output to check the current token
+        if (ruleOutputFile != nullptr) {
+            *ruleOutputFile << "Debug - Current token in parseAssign: Type="
+                            << static_cast<int>(currentToken.type)
+                            << ", Lexeme='" << currentToken.lexeme << "'" << std::endl;
+        }
+
         if (match(TokenType::OPER) && currentToken.lexeme == "="){
             advanceToken();
             parseExpression();
@@ -559,7 +587,7 @@ void Parser::parseTerm() {
 
 // R26a. <Term'> ::= * <Factor> <Term'> | / <Factor> <Term'> | ε
 void Parser::parseTermPrime() {
-    printProductionRule("<Term'> ::= * <Factor> <Term'> | / <Factor> <Term'> | ε");
+    printProductionRule("<Term> ::= * <Factor> <Term'> | / <Factor> <Term> | ε");
 
     if (match(TokenType::OPER) && (currentToken.lexeme == "*" || currentToken.lexeme == "/")) {
         std::string op = std::string(currentToken.lexeme); // Save the operator
@@ -627,7 +655,7 @@ void Parser::fillParserStack(std::vector<std::string> tokens) {
 
     // Push tokens in reverse order so the first token is on top of the stack
     for (int i = tokens.size() - 1; i >= 0; --i) {
-        parserStack.push(tokens[i]);
+        parserStack.emplace(tokens[i]);
     }
 
     // Debug output to check stack content
@@ -656,7 +684,7 @@ void Parser::parse() {
     }
 }
 
-void Parser::outputParseTree(std::ofstream& outFile) {
+void Parser::outputParseTree(std::ofstream& outFile) const {
     outFile << "\nParse Tree Summary:" << std::endl;
     outFile << "===================" << std::endl;
     outFile << "The parser applied a recursive descent parsing algorithm" << std::endl;
