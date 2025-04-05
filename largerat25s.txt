@@ -26,9 +26,10 @@ function fibonacci (x integer){
     endwhile;
     return 0;
 }
-
+$$
 integer x;
 x = 10;
+$$
 print(x);
 print(factorial(x));
 fibonacci(x);
