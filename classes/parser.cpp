@@ -15,7 +15,6 @@ void printProductionRule(const std::string& rule) {
     }
 }
 
-
 // Helper function to print token and lexeme information
 void printTokenInfo(const Token& token) {
     if (ruleOutputFile != nullptr) {
