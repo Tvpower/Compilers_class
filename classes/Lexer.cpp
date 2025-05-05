@@ -185,9 +185,7 @@ Lexer::StateTransition Lexer::handleCommentState() {
     advance(); // for '*'
     advance(); // for ']'
 
-    return {State::END, [this]() {
-        lastToken = {getCurrentLexeme(), TokenType::COMM};
-    }};
+    return {State::START, nullptr};
 }
 const std::unordered_map<sv, bool> Lexer::keywords = {
     {"function", true},

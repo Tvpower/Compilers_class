@@ -1,0 +1,22 @@
+Parsing completed successfully!
+
+Parse Tree Summary:
+===================
+The parser applied a recursive descent parsing algorithm
+following the Rat25S grammar (with left recursion removed)
+to analyze the input program.
+
+Remaining items in parser stack: 0
+
+Symbol Table:
+f @ 10000 : integer
+
+Assembly Code:
+1 PUSHM 10000
+2 S
+3 POPM 10000
+4 PUSHM 10000
+5 POPM 10000
+6 PUSHM 10000
+7 POPM 10000
+8 PUSHM 10000

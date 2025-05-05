@@ -9,5 +9,9 @@ add_executable(compilersAssigment2
         classes/Lexer.h
         classes/parser.cpp
         classes/parser.h
+        classes/SymbolTable.cpp
+        classes/SymbolTable.h
+        classes/CodeGen.cpp
+        classes/CodeGen.h
         )
 target_include_directories(compilersAssigment2 PRIVATE classes)

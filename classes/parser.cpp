@@ -1,38 +1,38 @@
 #include "parser.h"
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string_view>
 
 // Output file stream for production rules
 std::ofstream* ruleOutputFile = nullptr;
-bool printRules = true; // Switch to turn rule printing on/off
+bool printRules = false; //Switch to turn rule printing on/off
+bool printTokenInfoEnabled = false; // Toggle token print output HERE
 
 // Helper function to print production rules
 void printProductionRule(const std::string& rule) {
-    if (printRules && ruleOutputFile != nullptr) {
-        *ruleOutputFile << "    " << rule << std::endl;
+    if (printRules) {
+        std::cout << "Production Rule: " << rule << std::endl;
     }
 }
 
 // Helper function to print token and lexeme information
 void printTokenInfo(const Token& token) {
-    if (ruleOutputFile != nullptr) {
-        std::string tokenStr;
-        switch(token.type) {
-            case TokenType::IDENT: tokenStr = "Identifier"; break;
-            case TokenType::INT: tokenStr = "Integer"; break;
-            case TokenType::REAL: tokenStr = "Real"; break;
-            case TokenType::OPER: tokenStr = "Operator"; break;
-            case TokenType::SEPA: tokenStr = "Separator"; break;
-            case TokenType::KEYW: tokenStr = "Keyword"; break;
-            case TokenType::COMM: tokenStr = "Comment"; break;
-            case TokenType::UNKW: tokenStr = "Unknown"; break;
-            case TokenType::END: tokenStr = "End"; break;
-            default: tokenStr = "Unrecognized"; break;
-        }
-        *ruleOutputFile << "Token: " << tokenStr << "          Lexeme: " << token.lexeme << std::endl;
+    if (!printTokenInfoEnabled) return;
+
+    std::string tokenStr;
+    switch(token.type) {
+        case TokenType::IDENT: tokenStr = "Identifier"; break;
+        case TokenType::INT: tokenStr = "Integer"; break;
+        case TokenType::REAL: tokenStr = "Real"; break;
+        case TokenType::OPER: tokenStr = "Operator"; break;
+        case TokenType::SEPA: tokenStr = "Separator"; break;
+        case TokenType::KEYW: tokenStr = "Keyword"; break;
+        case TokenType::COMM: tokenStr = "Comment"; break;
+        case TokenType::UNKW: tokenStr = "Unknown"; break;
+        case TokenType::END: tokenStr = "End"; break;
+        default: tokenStr = "Unrecognized"; break;
     }
+    std::cout << "Token: " << tokenStr << "          Lexeme: " << token.lexeme << std::endl;
 }
 
 void Parser::advanceToken(){
@@ -295,11 +295,20 @@ void Parser::parseIDs(){
     printProductionRule("<IDs> ::= <Identifier> | <Identifier>, <IDs>");
 
     if (match(TokenType::IDENT)) {
+        std::string name = std::string(currentToken.lexeme);
         advanceToken();
+
+        if (!symbolTable.declare(name, "integer")){
+            error("Identifier '" + name + "' already declared");
+        }
+
         while(match(TokenType::SEPA) && currentToken.lexeme == ","){
             advanceToken();
             if (match(TokenType::IDENT)){
                 advanceToken();
+                if (!symbolTable.declare(name, "integer")){
+                    error("Identifier '" + name + "' already declared");
+                }
             } else {
                 error("Expected an identifier after ',' in ID list");
             }
@@ -379,18 +388,13 @@ void Parser::parseAssign(){
     printProductionRule("<Assign> ::= <Identifier> = <Expression> ;");
 
     if (match(TokenType::IDENT)){
+        std::string target = std::string(currentToken.lexeme);
         advanceToken();
-
-        // Debug output to check the current token
-        if (ruleOutputFile != nullptr) {
-            *ruleOutputFile << "Debug - Current token in parseAssign: Type="
-                            << static_cast<int>(currentToken.type)
-                            << ", Lexeme='" << currentToken.lexeme << "'" << std::endl;
-        }
 
         if (match(TokenType::OPER) && currentToken.lexeme == "="){
             advanceToken();
             parseExpression();
+            codeGen.emit("POPM", std::to_string(symbolTable.getAddress(target)));
             if (match(TokenType::SEPA) && currentToken.lexeme == ";"){
                 advanceToken();
             } else {
@@ -556,7 +560,6 @@ void Parser::parseCondition() {
 // Modified: R25. <Expression> ::= <Term> <Expression'>
 void Parser::parseExpression() {
     printProductionRule("<Expression> ::= <Term> <Expression'>");
-
     parseTerm();
     parseExpressionPrime();
 }
@@ -566,10 +569,18 @@ void Parser::parseExpressionPrime() {
     printProductionRule("<Expression'> ::= + <Term> <Expression'> | - <Term> <Expression'> | ε");
 
     if (match(TokenType::OPER) && (currentToken.lexeme == "+" || currentToken.lexeme == "-")) {
-        std::string op = std::string(currentToken.lexeme); // Save the operator
-        advanceToken();
-        parseTerm();
-        parseExpressionPrime();
+        if (currentToken.lexeme == "+") {
+            advanceToken();
+            parseTerm();
+            codeGen.emit("A");
+            parseExpressionPrime();
+        }
+        else if (currentToken.lexeme == "-") {
+            advanceToken();
+            parseTerm();
+            codeGen.emit("S");
+            parseExpressionPrime();
+        }        
     }
     // ε case - do nothing
 }
@@ -614,6 +625,7 @@ void Parser::parsePrimary() {
     printProductionRule("<Primary> ::= <Identifier> | <Integer> | <Identifier> ( <IDs> ) | ( <Expression> ) | <Real> | true | false");
 
     if (match(TokenType::IDENT)) {
+        codeGen.emit("PUSHM", std::to_string(symbolTable.getAddress(std::string(currentToken.lexeme))));
         advanceToken();
         // Check for function call syntax
         if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
@@ -642,9 +654,8 @@ void Parser::parsePrimary() {
     }
 }
 
-Parser::Parser(Lexer& lexer) : lexer(lexer), currentToken(lexer.getNextToken()) {
-    initializeParserStack();
-}
+Parser::Parser(Lexer& lexer, SymbolTable& symbolTable, CodeGen& codeGen)
+    : lexer(lexer), symbolTable(symbolTable), codeGen(codeGen), currentToken(lexer.getNextToken()) {}
 
 void Parser::fillParserStack(std::vector<std::string> tokens) {
     // Clear the stack first (in case it already has elements)

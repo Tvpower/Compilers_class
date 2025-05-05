@@ -9,6 +9,8 @@
 #include <fstream>
 
 #include "Lexer.h"
+#include "CodeGen.h"
+#include "SymbolTable.h"
 
 class Parser {
 private:
@@ -16,17 +18,19 @@ private:
     Token currentToken;
     std::stack<std::variant<std::string, TokenType>> parserStack;
 
+    CodeGen& codeGen;
+    SymbolTable& symbolTable;
+
     void advanceToken();
     bool match(TokenType expectedType) const;
     bool matchLexeme(const std::string& expectedLexeme) const;
     void error(const std::string& message) const;
     void initializeParserStack();
-
     void skipComments();
 
-    // Parser methods for each grammar rule
+    // Grammar rule parsing methods
     void parseRat25s();
-    void parseProgram(); // New method for flexible program structure
+    void parseProgram();
     void parseOptFunctionDefinitions();
     void parseFunctionDefinitions();
     void parseFunction();
@@ -41,7 +45,7 @@ private:
     void parseIDs();
     void parseStatementList();
     void parseStatement();
-    void parseCompound(); // Added for R16
+    void parseCompound();
     void parseAssign();
     void parseIf();
     void parseReturn();
@@ -50,28 +54,22 @@ private:
     void parseWhile();
     void parseCondition();
 
-    // Modified expression parsing methods (removing left recursion)
     void parseExpression();
-    void parseExpressionPrime(); // New for left recursion removal
+    void parseExpressionPrime();
     void parseTerm();
-    void parseTermPrime(); // New for left recursion removal
+    void parseTermPrime();
     void parseFactor();
     void parsePrimary();
 
 public:
-    explicit Parser(Lexer& lexer);
+    explicit Parser(Lexer& lexer, SymbolTable& symbolTable, CodeGen& codeGen);
 
-    // Configure the parser
     static void setOutputFile(std::ofstream& outFile);
     static void setRulePrinting(bool enabled);
     void fillParserStack(std::vector<std::string> tokens);
 
-    // Run the parser
     void parse();
-
-    // Output parse tree information
     void outputParseTree(std::ofstream& outFile) const;
-
 };
 
 #endif // PARSER_H
