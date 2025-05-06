@@ -8,20 +8,20 @@ to analyze the input program.
 
 Remaining items in parser stack: 0
 
-Symbol Table:
-f @ 10000 : integer
+ -- Test -- 
 
 Assembly Code:
-1 PUSHM 10000
-2 PUSHI 32
-3 S
-4 POPM 10000
-5 PUSHI 5
-6 PUSHM 10000
-7 M
-8 POPM 10000
-9 PUSHM 10000
-10 PUSHI 9
-11 D
-12 POPM 10000
-13 PUSHM 10000
+
+Symbol Table:
+c @ 10002 : integer
+b @ 10001 : integer
+a @ 10000 : integer
+
+ -- End Test -- 
+
+Symbol Table:
+c @ 10002 : integer
+b @ 10001 : integer
+a @ 10000 : integer
+
+Assembly Code:

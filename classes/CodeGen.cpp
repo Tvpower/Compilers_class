@@ -4,6 +4,7 @@
 int CodeGen::emit(const std::string& op, const std::string& operand) {
     int addr = instructions.size() + 1;
     instructions.push_back({addr, op, operand});
+    std::cout << "[EMIT]" << addr << ": " << op << " " << operand << std::endl;
     return addr;
 }
 

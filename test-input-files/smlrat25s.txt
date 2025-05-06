@@ -1,7 +1,9 @@
 [* this is comment for this sample code which converts Fahrenheit into Celcius *]
 $$
-real a, b, c;
-scan(a, b, c);
+real a;
+real b;
+real c;
+[*scan(a, b, c);*]
 $$
 a = a * b / c;
 print (a);

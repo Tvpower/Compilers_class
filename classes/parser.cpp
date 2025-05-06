@@ -394,6 +394,7 @@ void Parser::parseAssign(){
         if (match(TokenType::OPER) && currentToken.lexeme == "="){
             advanceToken();
             parseExpression();
+            std::cout << "[Assign] target = " << target << std::endl;
             codeGen.emit("POPM", std::to_string(symbolTable.getAddress(target)));
             if (match(TokenType::SEPA) && currentToken.lexeme == ";"){
                 advanceToken();
@@ -597,16 +598,23 @@ void Parser::parseTerm() {
 
 // R26a. <Term'> ::= * <Factor> <Term'> | / <Factor> <Term'> | ε
 void Parser::parseTermPrime() {
-    printProductionRule("<Term> ::= * <Factor> <Term'> | / <Factor> <Term> | ε");
+    printProductionRule("<Term'> ::= * <Factor> <Term'> | / <Factor> <Term'> | ε");
 
     if (match(TokenType::OPER) && (currentToken.lexeme == "*" || currentToken.lexeme == "/")) {
-        std::string op = std::string(currentToken.lexeme); // Save the operator
+        std::string op = std::string(currentToken.lexeme);
         advanceToken();
         parseFactor();
+
+        if (op == "*")
+            codeGen.emit("M");
+        else if (op == "/")
+            codeGen.emit("D");
+
         parseTermPrime();
     }
-    // ε case - do nothing
+    // ε production – do nothing
 }
+
 
 // R27. <Factor> ::= - <Primary> | <Primary>
 void Parser::parseFactor() {
@@ -622,9 +630,12 @@ void Parser::parseFactor() {
 
 // R28. <Primary> ::= <Identifier> | <Integer> | <Identifier> ( <IDs> ) | ( <Expression> ) | <Real> | true | false
 void Parser::parsePrimary() {
+    std::cout << "[Primary] found identifier(1): " << currentToken.lexeme << std::endl;
+
     printProductionRule("<Primary> ::= <Identifier> | <Integer> | <Identifier> ( <IDs> ) | ( <Expression> ) | <Real> | true | false");
 
     if (match(TokenType::IDENT)) {
+        std::cout << "[Primary] found identifier(2): " << currentToken.lexeme << std::endl;
         codeGen.emit("PUSHM", std::to_string(symbolTable.getAddress(std::string(currentToken.lexeme))));
         advanceToken();
         // Check for function call syntax
@@ -638,6 +649,7 @@ void Parser::parsePrimary() {
             }
         }
     } else if (match(TokenType::INT) || match(TokenType::REAL)) {
+        codeGen.emit("PUSHI", std::string(currentToken.lexeme));
         advanceToken();
     } else if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
         advanceToken();
