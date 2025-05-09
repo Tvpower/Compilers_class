@@ -1,6 +1,7 @@
-#Never made one of these before!
+#First time making a makefile!
 CXX = g++
 CXXFLAGS = -std=c++17
+
 SRC = main.cpp \
       classes/parser.cpp \
       classes/SymbolTable.cpp \
@@ -16,7 +17,16 @@ $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
 
 run: all
-	./parser test-input-files/medrat25s.txt test-input-files/medrat25s.txt.out
+	./$(TARGET) test-input-files/testCodeHere.txt test-input-files/testCodeOut.txt
 
 clean:
 	rm -f $(TARGET)
+
+small: all
+	./$(TARGET) test-input-files/smlrat25s.txt test-input-files/smlrat25s.txt.out
+
+med: all
+	./$(TARGET) test-input-files/medrat25s.txt test-input-files/medrat25s.txt.out
+
+large: all
+	./$(TARGET) test-input-files/largerat25s.txt test-input-files/largerat25s.txt.out

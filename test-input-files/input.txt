@@ -1,9 +1,0 @@
-$$
-integer f;
-f = 68;
-f = f - 32;
-f = 5 * f;
-f = f / 9;
-print(f);
-$$
-

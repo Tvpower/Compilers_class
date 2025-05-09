@@ -9,21 +9,5 @@ to analyze the input program.
 Remaining items in parser stack: 0
 
 Symbol Table:
-f @ 10000 : integer
 
 Assembly Code:
-1 PUSHI 68
-2 POPM 10000
-3 PUSHM 10000
-4 PUSHI 32
-5 S
-6 POPM 10000
-7 PUSHI 5
-8 PUSHM 10000
-9 M
-10 POPM 10000
-11 PUSHM 10000
-12 PUSHI 9
-13 D
-14 POPM 10000
-15 PUSHM 10000

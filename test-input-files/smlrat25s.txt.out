@@ -8,17 +8,6 @@ to analyze the input program.
 
 Remaining items in parser stack: 0
 
- -- Test -- 
-
-Assembly Code:
-
-Symbol Table:
-c @ 10002 : integer
-b @ 10001 : integer
-a @ 10000 : integer
-
- -- End Test -- 
-
 Symbol Table:
 c @ 10002 : integer
 b @ 10001 : integer
