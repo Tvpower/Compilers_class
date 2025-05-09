@@ -171,7 +171,9 @@ void Parser::parseFunction() {
     if (match(TokenType::KEYW) && currentToken.lexeme == "function") {
         advanceToken();
         if (match(TokenType::IDENT)) {
+            std::string functionName = std::string(currentToken.lexeme);
             advanceToken();
+            codeGen.emit("LABEL", functionName);
             if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
                 advanceToken();
                 parseOptParameterList();
@@ -446,8 +448,11 @@ void Parser::parseReturn(){
         advanceToken();
         if (match(TokenType::SEPA) && currentToken.lexeme == ";") {
             advanceToken();
+            codeGen.emit("RET");
         } else {
             parseExpression();
+            codeGen.emit("POP", "R1");
+            codeGen.emit("RET");
             if (match(TokenType::SEPA) && currentToken.lexeme == ";") {
                 advanceToken();
             } else {
@@ -466,6 +471,7 @@ void Parser::parsePrint() {
         if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
             advanceToken();
             parseExpression();
+            codeGen.emit("OUT");
             if (match(TokenType::SEPA) && currentToken.lexeme == ")") {
                 advanceToken();
                 if (match(TokenType::SEPA) && currentToken.lexeme == ";") {
@@ -635,18 +641,29 @@ void Parser::parsePrimary() {
     printProductionRule("<Primary> ::= <Identifier> | <Integer> | <Identifier> ( <IDs> ) | ( <Expression> ) | <Real> | true | false");
 
     if (match(TokenType::IDENT)) {
+        std::string ident = std::string(currentToken.lexeme);
         std::cout << "[Primary] found identifier(2): " << currentToken.lexeme << std::endl;
-        codeGen.emit("PUSHM", std::to_string(symbolTable.getAddress(std::string(currentToken.lexeme))));
+        //codeGen.emit("PUSHM", std::to_string(symbolTable.getAddress(std::string(currentToken.lexeme))));
         advanceToken();
         // Check for function call syntax
         if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
             advanceToken();
-            parseIDs(); // Function call arguments
-            if (match(TokenType::SEPA) && currentToken.lexeme == ")") {
-                advanceToken();
-            } else {
-                error("Expected ')' after function call arguments");
+            //parseIDs(); // Function call arguments
+            if (!(match(TokenType::SEPA) && currentToken.lexeme == ")")) {
+                parseExpression();
+                while (match(TokenType::SEPA) && currentToken.lexeme == ","){
+                    advanceToken();
+                    parseExpression();
+                }
             }
+            if (match(TokenType::SEPA) && currentToken.lexeme == ")"){
+                advanceToken();
+                codeGen.emit("CALL", ident);
+            } else {
+                error("Expected ')' after function arguments");
+            }
+        } else {
+            codeGen.emit("PUSHM", std::to_string(symbolTable.getAddress(ident)));
         }
     } else if (match(TokenType::INT) || match(TokenType::REAL)) {
         codeGen.emit("PUSHI", std::string(currentToken.lexeme));
@@ -660,6 +677,7 @@ void Parser::parsePrimary() {
             error("Expected a matching ')' after sub-expression");
         }
     } else if (match(TokenType::KEYW) && (currentToken.lexeme == "true" || currentToken.lexeme == "false")) {
+        codeGen.emit("PUSHI", currentToken.lexeme == "true" ? "1" : "0");
         advanceToken();
     } else {
         error("Expected an identifier, number, or sub-expression");

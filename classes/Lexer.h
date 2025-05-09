@@ -60,6 +60,7 @@ private:
     char current() const {
         return pos < buffer.length() ? buffer[pos] : '\0';
     }
+    
 
     char peek() const{
       return (pos + 1) < buffer.length() ? buffer[pos + 1] : '\0';
@@ -76,7 +77,7 @@ private:
         return sv{buffer.data() + start, length};
     }
 
-
+    
     bool isOperator(char c) const {
         return c == '<' || c == '>' || c == '=' ||
                c == '+' || c == '-' || c == '*' || c == '/';
@@ -109,6 +110,21 @@ public:
         file.read(buffer.data(), size);
     }
     Token getNextToken();
+    Token peekToken() {
+        size_t savedStart = start;
+        size_t savedPos = pos;
+        State savedState = currentState;
+        Token savedLastToken = lastToken;
+    
+        Token peeked = getNextToken();
+    
+        start = savedStart;
+        pos = savedPos;
+        currentState = savedState;
+        lastToken = savedLastToken;
+    
+        return peeked;
+    }    
 };
 
 

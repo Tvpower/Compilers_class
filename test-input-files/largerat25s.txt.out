@@ -1,3 +1,3 @@
-Syntax error: Identifier 'a' already declared at token ,
-Parsing failed: Syntax error: Identifier 'a' already declared
-Exception: Syntax error: Identifier 'a' already declared
+Syntax error: Identifier 'x' already declared at token integer
+Parsing failed: Syntax error: Identifier 'x' already declared
+Exception: Syntax error: Identifier 'x' already declared

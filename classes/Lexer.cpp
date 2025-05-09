@@ -203,4 +203,3 @@ const std::unordered_map<sv, bool> Lexer::keywords = {
     {"true", true},
     {"false", true}
 };
-
