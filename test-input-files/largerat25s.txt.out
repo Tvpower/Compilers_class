@@ -1,3 +1,54 @@
-Syntax error: Identifier 'x' already declared at token integer
-Parsing failed: Syntax error: Identifier 'x' already declared
-Exception: Syntax error: Identifier 'x' already declared
+Parsing completed successfully!
+
+Parse Tree Summary:
+===================
+The parser applied a recursive descent parsing algorithm
+following the Rat25S grammar (with left recursion removed)
+to analyze the input program.
+
+Remaining items in parser stack: 0
+
+Symbol Table:
+Scope 0:
+
+Assembly Code:
+1 LABEL factorial
+2 PUSHI 1
+3 POPM 10001
+4 PUSHM 10000
+5 PUSHI 1
+6 PUSHM 10001
+7 PUSHM 10000
+8 M
+9 POPM 10001
+10 PUSHM 10000
+11 PUSHI 1
+12 S
+13 POPM 10000
+14 PUSHM 10001
+15 POP R1
+16 RET
+17 LABEL fibonacci
+18 PUSHI 0
+19 POPM 10003
+20 PUSHI 1
+21 POPM 10004
+22 PUSHM 10003
+23 OUT
+24 PUSHM 10004
+25 OUT
+26 PUSHM 10004
+27 PUSHM 10002
+28 PUSHM 10003
+29 PUSHM 10004
+30 A
+31 POPM 10005
+32 PUSHM 10004
+33 POPM 10003
+34 PUSHM 10005
+35 POPM 10004
+36 PUSHM 10005
+37 OUT
+38 PUSHI 0
+39 POP R1
+40 RET

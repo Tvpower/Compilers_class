@@ -1,13 +1,3 @@
-Parsing completed successfully!
-
-Parse Tree Summary:
-===================
-The parser applied a recursive descent parsing algorithm
-following the Rat25S grammar (with left recursion removed)
-to analyze the input program.
-
-Remaining items in parser stack: 0
-
-Symbol Table:
-
-Assembly Code:
+Syntax error: Expected $$ at start of Rat25s at token 
+Parsing failed: Syntax error: Expected $$ at start of Rat25s
+Exception: Syntax error: Expected $$ at start of Rat25s

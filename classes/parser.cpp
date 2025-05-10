@@ -174,6 +174,10 @@ void Parser::parseFunction() {
             std::string functionName = std::string(currentToken.lexeme);
             advanceToken();
             codeGen.emit("LABEL", functionName);
+            
+            // Enter new scope for function
+            symbolTable.enterScope();
+            
             if (match(TokenType::SEPA) && currentToken.lexeme == "(") {
                 advanceToken();
                 parseOptParameterList();
@@ -181,10 +185,15 @@ void Parser::parseFunction() {
                     advanceToken();
                     parseOptDeclarationList();
                     parseBody();
+                    
+                    // Exit function scope
+                    symbolTable.exitScope();
                 } else {
+                    symbolTable.exitScope();  // Clean up scope on error
                     error("Expected ')' after parameter list");
                 }
             } else {
+                symbolTable.exitScope();  // Clean up scope on error
                 error("Expected '(' after function identifier");
             }
         } else {
@@ -307,6 +316,7 @@ void Parser::parseIDs(){
         while(match(TokenType::SEPA) && currentToken.lexeme == ","){
             advanceToken();
             if (match(TokenType::IDENT)){
+                name = std::string(currentToken.lexeme);  // Get the new identifier
                 advanceToken();
                 if (!symbolTable.declare(name, "integer")){
                     error("Identifier '" + name + "' already declared");

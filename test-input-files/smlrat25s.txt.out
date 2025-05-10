@@ -9,8 +9,9 @@ to analyze the input program.
 Remaining items in parser stack: 0
 
 Symbol Table:
-c @ 10002 : integer
-b @ 10001 : integer
-a @ 10000 : integer
+Scope 0:
+  c @ 10002 : integer
+  b @ 10001 : integer
+  a @ 10000 : integer
 
 Assembly Code:
